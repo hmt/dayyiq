@@ -1,0 +1,31 @@
+.row
+  .col-md-12
+    h1
+      span.brand = Konfig::BRAND
+.row
+  .col-md-12
+    - 12.times do |months|
+      - date = Date.today >> months
+      table.table.table-bordered
+        thead
+          tr
+            th #{date.strftime "%B"}
+            - cals.each do |cal|
+              th #{cal.x_wr_calname}
+        tbody
+          - days = (date.end_of_month - date.beginning_of_month + 1).to_i
+          - days.times do |day|
+            tr
+              td
+                - d = Date.new(date.year, date.month, day+1)
+                = d.strftime "%e.%-m.%Y"
+              - cals.each do |cal|
+                td
+                  - todays_events = cal.events.drop_while { |e| e.dtstart.to_date == d }
+                  - todays_events.each do |event|
+                    - if event.dtstart.to_date == d
+                      #{event.summary}
+                      - if event.dtstart.is_a? DateTime
+                        #{event.dtstart.in_time_zone(cal.x_wr_timezone).strftime "%k:%M"}
+                      - if event.dtend > event.dtstart+2
+                        | bis #{event.dtend.strftime "%e.%m."}
