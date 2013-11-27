@@ -23,7 +23,7 @@
               - cals.each do |cal|
                 td
                   - todays_events = cal.events.drop_while { |e| e.dtstart.to_date == d }
-                  - todays_events.each do |event|
+                  - todays_events.sort{ |x,y| x.dtstart <=> y.dtstart}.each do |event|
                     - if event.dtstart.to_date == d
                       #{event.summary}
                       - if event.dtstart.is_a? DateTime
