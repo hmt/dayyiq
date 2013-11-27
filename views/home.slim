@@ -4,8 +4,9 @@
       span.brand = Konfig::BRAND
 .row
   .col-md-12
+    - today = Date.today
     - 12.times do |months|
-      - date = Date.today >> months
+      - date = today >> months
       table.table.table-bordered
         thead
           tr
@@ -15,9 +16,9 @@
         tbody
           - days = (date.end_of_month - date.beginning_of_month + 1).to_i
           - days.times do |day|
-            tr
+            - d = Date.new(date.year, date.month, day+1)
+            tr class=('success' if d == today)
               td
-                - d = Date.new(date.year, date.month, day+1)
                 = d.strftime "%e.%-m.%Y"
               - cals.each do |cal|
                 td
