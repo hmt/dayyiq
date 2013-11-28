@@ -7,7 +7,7 @@
     - today = Date.today
     - 12.times do |months|
       - date = today >> months
-      table.table.table-bordered
+      table.table.table-bordered.table-condensed
         thead
           tr
             th #{date.strftime "%B"}
@@ -19,14 +19,21 @@
             - d = Date.new(date.year, date.month, day+1)
             tr class=('success' if d == today)
               td
+                = d.strftime "%A"
+                br
                 = d.strftime "%e.%-m.%Y"
               - cals.each do |cal|
                 td
-                  - todays_events = cal.events.drop_while { |e| e.dtstart.to_date == d }
+                  - todays_events = cal.events.select { |event| event.dtstart.to_date == d }
                   - todays_events.sort{ |x,y| x.dtstart <=> y.dtstart}.each do |event|
-                    - if event.dtstart.to_date == d
-                      #{event.summary}
+                    p
+                      => event.summary
+                      br
+                      - if event.last_modified > today.prev_week.prev_week
+                        label.label.label-danger
+                          i.fa.fa-bolt
                       - if event.dtstart.is_a? DateTime
-                        #{event.dtstart.in_time_zone(cal.x_wr_timezone).strftime "%k:%M"}
+                        => event.dtstart.in_time_zone(cal.x_wr_timezone).strftime "%k:%M"
                       - if event.dtend > event.dtstart+2
-                        | bis #{event.dtend.strftime "%e.%m."}
+                        i.fa.fa-fast-forward
+                        =< event.dtend.strftime "%e.%m."
