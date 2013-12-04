@@ -1,3 +1,9 @@
+GIT
+  remote: https://github.com/espen/ri_cal.git
+  revision: 86e3998a0ab65762ae70d949f43bb324182b0f09
+  specs:
+    ri_cal (0.9.4)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -6,7 +12,6 @@ GEM
       multi_json (~> 1.0)
     backports (3.3.5)
     i18n (0.6.5)
-    icalendar (1.4.5)
     minitest (5.0.8)
     multi_json (1.8.2)
     newrelic_rpm (3.6.9.171)
@@ -43,12 +48,12 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport
-  icalendar
   minitest (~> 5)
   newrelic_rpm
   puma
   rack-test
   rake
+  ri_cal!
   sass
   sinatra
   sinatra-contrib

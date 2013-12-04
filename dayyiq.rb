@@ -12,7 +12,7 @@ require 'slim'
 require 'sass'
 require 'active_support/core_ext/date/calculations'
 require 'active_support/time'
-require 'icalendar'
+require 'ri_cal'
 require 'date'
 require 'open-uri'
 require 'tzinfo'
@@ -23,8 +23,6 @@ rescue LoadError
   puts "Please use your own config file. For now we're using config-example.rb"
   require"#{File.dirname(__FILE__)}/config-example"
 end
-
-include Icalendar
 
 configure do
   set :slim, :pretty => true
@@ -38,7 +36,7 @@ get '/' do
     puts 'You need an ics file to parse'
     raise
   end
-  cals = Icalendar.parse(cal_file)
+  cals = RiCal.parse(cal_file)
   slim :home, :locals => { :title => Konfig::TITLE, :cals => cals }
 end
 

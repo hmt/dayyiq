@@ -2,7 +2,7 @@ source "http://rubygems.org"
 gem 'sinatra'
 gem 'slim'
 gem 'sass'
-gem 'icalendar'
+gem 'ri_cal', :git => 'https://github.com/espen/ri_cal.git'
 gem 'activesupport'
 gem 'tzinfo'
 gem 'tzinfo-data'

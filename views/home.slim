@@ -12,7 +12,7 @@
           tr
             th #{date.strftime "%B"}
             - cals.each do |cal|
-              th #{cal.x_wr_calname}
+              th #{cal.x_wr_calname.first}
         tbody
           - days = (date.end_of_month - date.beginning_of_month + 1).to_i
           - days.times do |day|
@@ -33,7 +33,7 @@
                         label.label.label-danger
                           i.fa.fa-bolt
                       - if event.dtstart.is_a? DateTime
-                        => event.dtstart.in_time_zone(cal.x_wr_timezone).strftime "%k:%M"
+                        => event.dtstart.in_time_zone(cal.x_wr_timezone.first).strftime "%k:%M"
                       - if event.dtend > event.dtstart+2
                         i.fa.fa-fast-forward
                         =< event.dtend.strftime "%e.%m."
