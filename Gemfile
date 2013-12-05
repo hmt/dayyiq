@@ -6,16 +6,13 @@ gem 'icalendar'
 gem 'activesupport'
 gem 'tzinfo'
 gem 'tzinfo-data'
-
-group :production do
-  gem 'newrelic_rpm'
-end
+gem "rubysl", "~> 2.0", :platforms => 'rbx'
+gem 'puma'
 
 group :development, :test do
   gem 'minitest', '~>5'
   gem 'sinatra-contrib'
   gem 'rack-test'
   gem 'rake'
-  gem 'puma'
 end
 
