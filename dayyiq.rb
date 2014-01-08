@@ -27,6 +27,7 @@ end
 configure do
   set :slim, :pretty => true
   enable :sessions
+  set :session_secret, ENV['dayyiq_secret'] ||= 'super secret'
   set :protection, :except => :session_hijacking
 end
 
