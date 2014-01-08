@@ -27,6 +27,7 @@ end
 configure do
   set :slim, :pretty => true
   enable :sessions
+  set :protection, :except => :session_hijacking
 end
 
 get '/' do
