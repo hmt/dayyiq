@@ -52,8 +52,8 @@ class Dayyiq < Sinatra::Base
   end
 
   get '/css/:file.css' do
-    halt 404 unless File.exist?("views/#{params[:file]}.scss")
-    time = File.stat("views/#{params[:file]}.scss").ctime
+    halt 404 unless File.exist?("#{settings.views}/#{params[:file]}.scss")
+    time = File.stat("#{settings.views}/#{params[:file]}.scss").ctime
     last_modified(time)
     scss params[:file].intern
   end
