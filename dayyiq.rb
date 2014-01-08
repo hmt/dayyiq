@@ -41,6 +41,16 @@ class Dayyiq < Sinatra::Base
     require 'sinatra/reloader'
   end
 
+  helpers do
+    def partial(template, locals = {})
+      slim template, :layout => false, :locals => locals
+    end
+
+    def flash
+      @flash = session.delete(:flash)
+    end
+  end
+
   get '/css/:file.css' do
     halt 404 unless File.exist?("views/#{params[:file]}.scss")
     time = File.stat("views/#{params[:file]}.scss").ctime

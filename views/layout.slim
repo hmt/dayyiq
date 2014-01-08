@@ -14,6 +14,11 @@ html lang="en"
   body
     #wrap
       .container
+        .row
+          .col-md-12
+            h1
+              span.brand = Konfig::BRAND
+        ==partial :partial_flash
         ==yield
     #footer
       .container
