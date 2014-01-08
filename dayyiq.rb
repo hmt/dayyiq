@@ -31,6 +31,13 @@ configure do
   set :protection, :except => :session_hijacking
 end
 
+get '/css/:file.css' do
+  halt 404 unless File.exist?("views/#{params[:file]}.scss")
+  time = File.stat("views/#{params[:file]}.scss").ctime
+  last_modified(time)
+  scss params[:file].intern
+end
+
 get '/' do
   begin
     cal_file = File.open(Konfig::ICS_FILE)

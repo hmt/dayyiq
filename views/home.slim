@@ -23,9 +23,11 @@
                 br
                 = d.strftime "%e.%-m.%Y"
               - cals.each do |cal|
-                td
+                td class=("active" if d.sunday?)
+                  - if d.sunday?
+                    b.text-muted #{cal.x_wr_calname.first}
                   - todays_events = cal.events.select { |event| event.dtstart.to_date == d }
-                  - todays_events.sort{ |x,y| x.dtstart <=> y.dtstart}.each do |event|
+                  - todays_events.sort { |x,y| x.dtstart <=> y.dtstart}.each do |event|
                     p
                       => event.summary
                       br
