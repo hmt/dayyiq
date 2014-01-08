@@ -32,6 +32,7 @@ class Dayyiq < Sinatra::Base
     set :protection, :except => :session_hijacking
     enable :method_override
     enable :static
+    enable :logging
     set :public_dir, settings.root + "/public"
     set :views, settings.root + '/views'
     set :slim, :pretty => true
