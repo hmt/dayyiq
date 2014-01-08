@@ -21,7 +21,7 @@ begin
   require "#{File.dirname(__FILE__)}/config"
 rescue LoadError
   puts "Please use your own config file. For now we're using config-example.rb"
-  require"#{File.dirname(__FILE__)}/config-example"
+  require "#{File.dirname(__FILE__)}/config-example"
 end
 
 configure do
