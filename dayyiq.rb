@@ -7,7 +7,7 @@
 # Copyright:: Copyright (c) 2013 hmt
 # License:: MIT License
 #
-require 'sinatra'
+require 'sinatra/base'
 require 'slim'
 require 'sass'
 require 'active_support/core_ext/date/calculations'
@@ -16,7 +16,6 @@ require 'ri_cal'
 require 'date'
 require 'open-uri'
 require 'tzinfo'
-require 'sinatra/reloader' if development?
 begin
   require "#{File.dirname(__FILE__)}/config"
 rescue LoadError
@@ -24,28 +23,39 @@ rescue LoadError
   require "#{File.dirname(__FILE__)}/config-example"
 end
 
-configure do
-  set :slim, :pretty => true
-  enable :sessions
-  set :session_secret, ENV['dayyiq_secret'] ||= 'super secret'
-  set :protection, :except => :session_hijacking
-end
+AppRoot = File.expand_path(File.dirname(__FILE__))
 
-get '/css/:file.css' do
-  halt 404 unless File.exist?("views/#{params[:file]}.scss")
-  time = File.stat("views/#{params[:file]}.scss").ctime
-  last_modified(time)
-  scss params[:file].intern
-end
-
-get '/' do
-  begin
-    cal_file = File.open(Konfig::ICS_FILE)
-  rescue
-    puts 'You need an ics file to parse'
-    raise
+class Dayyiq < Sinatra::Base
+  configure do
+    enable :sessions
+    set :session_secret, ENV['dayyiq_secret'] ||= 'super secret'
+    set :protection, :except => :session_hijacking
+    enable :method_override
+    enable :static
+    set :public_dir, settings.root + "/public"
+    set :views, settings.root + '/views'
+    set :slim, :pretty => true
   end
-  cals = RiCal.parse(cal_file)
-  slim :home, :locals => { :title => Konfig::TITLE, :cals => cals }
-end
 
+  configure :development do
+    require 'sinatra/reloader'
+  end
+
+  get '/css/:file.css' do
+    halt 404 unless File.exist?("views/#{params[:file]}.scss")
+    time = File.stat("views/#{params[:file]}.scss").ctime
+    last_modified(time)
+    scss params[:file].intern
+  end
+
+  get '/' do
+    begin
+      cal_file = File.open(File.join(AppRoot, Konfig::ICS_FILE))
+    rescue
+      puts 'You need an ics file to parse'
+      raise
+    end
+    cals = RiCal.parse(cal_file)
+    slim :home, :locals => { :title => Konfig::TITLE, :cals => cals }
+  end
+end
