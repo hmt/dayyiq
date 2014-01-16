@@ -28,7 +28,7 @@
                       => event.summary
                       br
                       - if event.last_modified > today.prev_week.prev_week
-                        label.label.label-danger
+                        label.label.label-danger>
                           i.fa.fa-bolt
                       - if event.dtstart.is_a? DateTime
                         => event.dtstart.in_time_zone(cal.x_wr_timezone.first).strftime "%k:%M"

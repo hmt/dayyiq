@@ -19,6 +19,15 @@ html lang="en"
             h1
               span.brand = Konfig::BRAND
         ==partial :partial_flash
+        p
+          | Legende: 
+          br
+          label.label.label-danger>
+            i.fa.fa-bolt
+          | markiert einen Termin, der in den letzten zwei Wochen neu hinzugefügt oder modifiziert worden ist.
+          br
+          i.fa.fa-fast-forward>
+          | mehrtägiger Termin, z.B. Praktikum
         ==yield
     #footer
       .container
