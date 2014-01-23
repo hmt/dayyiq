@@ -8,30 +8,30 @@
           tr
             th #{date.strftime "%B"}
             - cals.each do |cal|
-              th #{cal.x_wr_calname.first}
+              th =cal
         tbody
           - days = (date.end_of_month - date.beginning_of_month + 1).to_i
           - days.times do |day|
             - d = Date.new(date.year, date.month, day+1)
             tr class=('success' if d == today)
-              td
+              td class=("active" if d.sunday?)
                 = d.strftime "%A"
                 br
                 = d.strftime "%e.%-m.%Y"
-              - cals.each do |cal|
+              - events_list.each do |events|
                 td class=("active" if d.sunday?)
                   - if d.sunday?
-                    b.text-muted #{cal.x_wr_calname.first}
-                  - todays_events = cal.events.select { |event| event.dtstart.to_date == d }
-                  - todays_events.sort { |x,y| x.dtstart <=> y.dtstart}.each do |event|
+                    b.text-muted #{cals.push(cals.shift).last}
+                  - find_todays_events(events, d).each do |e|
                     p
-                      => event.summary
+                      =e.summary
                       br
-                      - if event.last_modified > today.prev_week.prev_week
+                      - if e.updated > today.prev_week.prev_week
                         label.label.label-danger>
                           i.fa.fa-bolt
-                      - if event.dtstart.is_a? DateTime
-                        => event.dtstart.in_time_zone(cal.x_wr_timezone.first).strftime "%k:%M"
-                      - if event.dtend > event.dtstart+2
-                        i.fa.fa-fast-forward
-                        =< event.dtend.strftime "%e.%m."
+                      -unless e.start.date.nil?
+                        -if Date.iso8601(e.end.date) > Date.iso8601(e.start.date)+2
+                          i.fa.fa-fast-forward
+                          =<Date.iso8601(e.end.date).strftime "%e.%m."
+                      -unless e.start.date_time.nil?
+                        =>e.start.date_time.strftime "%k:%M"
