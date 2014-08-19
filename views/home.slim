@@ -32,6 +32,6 @@
                           i.fa.fa-bolt
                       - if event.dtstart.is_a? DateTime
                         => event.dtstart.in_time_zone(cal.x_wr_timezone.first).strftime "%k:%M"
-                      - if event.dtend > event.dtstart+2
+                      - if event.dtend > event.dtstart+1
                         i.fa.fa-fast-forward
-                        =< event.dtend.strftime "%e.%m."
+                        =< (event.dtend-1).strftime "%e.%m."
