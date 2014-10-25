@@ -46,6 +46,7 @@ class Dayyiq < Sinatra::Base
     client = Google::APIClient.new(
       :application_name => 'Dayyiq, a tight Google calendar app',
       :application_version => '2.0.0')
+    client.retries = 3
 
     file_storage = Google::APIClient::FileStorage.new(CREDENTIAL_STORE_FILE)
     if file_storage.authorization.nil?
