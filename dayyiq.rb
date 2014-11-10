@@ -16,6 +16,9 @@ require 'sass'
 require 'active_support/core_ext/date/calculations'
 require 'active_support/time'
 require 'date'
+require 'rack/perftools_profiler'
+require "benchmark"
+
 begin
   require "#{File.dirname(__FILE__)}/config"
 rescue LoadError
@@ -24,6 +27,28 @@ rescue LoadError
 end
 
 AppRoot = File.expand_path(File.dirname(__FILE__))
+
+class Calender
+  def initialize(cal)
+    @cal = cal
+  end
+
+  def day_events(day)
+    ret = @cal.select do |e|
+      same_day?(e, day)
+    end
+    @cal=@cal-ret
+    ret
+  end
+
+  def same_day?(e, day)
+    if !e.start.date.nil?
+      e.start.date == day.strftime("%Y-%m-%d")
+    elsif !e.start.date_time.nil?
+      e.start.date_time.strftime("%Y-%m-%d") == day.strftime("%Y-%m-%d")
+    end
+  end
+end
 
 class Dayyiq < Sinatra::Base
   CREDENTIAL_STORE_FILE = "#{$0}-oauth2.json"
@@ -43,6 +68,7 @@ class Dayyiq < Sinatra::Base
   end
 
   configure do
+    use ::Rack::PerftoolsProfiler, :default_printer => 'gif'
     client = Google::APIClient.new(
       :application_name => 'Dayyiq, a tight Google calendar app',
       :application_version => '2.0.0')
@@ -89,16 +115,6 @@ class Dayyiq < Sinatra::Base
 
     def flash
       @flash = session.delete(:flash)
-    end
-
-    def find_todays_events(cal, d=Date.today)
-      cal.select do |e|
-        if !e.start.date.nil?
-          Date.iso8601(e.start.date) == d
-        elsif !e.start.date_time.nil?
-          e.start.date_time.to_date == d
-        end
-      end
     end
   end
 
@@ -149,19 +165,28 @@ class Dayyiq < Sinatra::Base
       i.summary
     end
     cals.compact!
-    #save all users mentioned in calendars in a set
-    events_list = result.data.items.map do |i|
-      #skip calendar if primary or not owned by user (cannot be changed anyway)
+    cal_ids = result.data.items.map do |i|
       next if i.primary || i.accessRole != "owner"
-      r = api_client.execute(:api_method => calendar_api.events.list,
-                             :parameters => {'calendarId' => i.id},
-                             :timeMax => DateTime.now.next_month,
-                             :timeMin => DateTime.now.beginning_of_month)
-      #capture all calendars and their events and map it to an Array
-      r.data.items.delete_if { |item| item.status == "cancelled" }
+      i.id
+    end
+    cal_ids.compact!
+
+    #save all users mentioned in calendars in a set
+    events_list = cal_ids.map do |i|
+      #skip calendar if primary or not owned by user (cannot be changed anyway)
+      api_client.execute(:api_method => calendar_api.events.list,
+                         :parameters => {
+                            'calendarId' => i,
+                            'showDeleted' => false,
+                            'singleEvents' => true,
+                            'timeMin' => (Date.today.beginning_of_month).strftime('%Y-%m-%dT%H:%M:%S%:z'),
+                            'timeMax' => (Date.today.beginning_of_month+12.months).strftime('%Y-%m-%dT%H:%M:%S%:z')
+                          }
+                        )
     end
     #remove skipped entries (=nil)
     events_list.compact!
-    slim :home, :locals => { :title => Konfig::TITLE, :events_list => events_list, :cals => cals}
+    calendars = events_list.map { |c| Calender.new(c.data.items) }
+    slim :home, :locals => { :title => Konfig::TITLE, :cals => cals, :calendars => calendars}
   end
 end

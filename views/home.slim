@@ -3,6 +3,7 @@
     - today = Date.today
     - 12.times do |months|
       - date = today >> months
+      - d = Date.new(date.year, date.month, 1)
       table.table.table-bordered.table-condensed
         thead
           tr
@@ -12,17 +13,16 @@
         tbody
           - days = (date.end_of_month - date.beginning_of_month + 1).to_i
           - days.times do |day|
-            - d = Date.new(date.year, date.month, day+1)
             tr class=('success' if d == today)
               td class=("active" if d.sunday?)
                 = d.strftime "%A"
                 br
                 = d.strftime "%e.%-m.%Y"
-              - events_list.each do |events|
+              - calendars.each do |cal|
                 td class=("active" if d.sunday?)
                   - if d.sunday?
                     b.text-muted #{cals.push(cals.shift).last}
-                  - find_todays_events(events, d).each do |e|
+                  - cal.day_events(d).each do |e|
                     p
                       =e.summary
                       br
@@ -35,3 +35,4 @@
                           =<Date.iso8601(e.end.date).strftime "%e.%m."
                       -unless e.start.date_time.nil?
                         =>e.start.date_time.strftime "%k:%M"
+            - d = d+1
