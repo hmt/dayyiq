@@ -29,24 +29,26 @@ end
 AppRoot = File.expand_path(File.dirname(__FILE__))
 
 class Calender
-  def initialize(cal)
+  def initialize(cal, time_max, time_min)
     @cal = cal
+    @time_max = time_max
+    @time_min = time_min
+    days = time_max - time_min
+    @ary = Array.new(days) {Array.new}
+    fill_ary
+  end
+
+  def fill_ary
+    @cal.each do |e|
+      date = e.start.date || e.start.date_time
+      date = date.to_date
+      @ary[@time_min-date] << e
+    end
   end
 
   def day_events(day)
-    ret = @cal.select do |e|
-      same_day?(e, day)
-    end
-    @cal=@cal-ret
-    ret
-  end
-
-  def same_day?(e, day)
-    if !e.start.date.nil?
-      e.start.date == day.strftime("%Y-%m-%d")
-    elsif !e.start.date_time.nil?
-      e.start.date_time.strftime("%Y-%m-%d") == day.strftime("%Y-%m-%d")
-    end
+    date = @time_min-day
+    @ary[date]
   end
 end
 
@@ -170,7 +172,8 @@ class Dayyiq < Sinatra::Base
       i.id
     end
     cal_ids.compact!
-
+    time_min = (Date.today.beginning_of_month)
+    time_max = (Date.today.beginning_of_month+12.months)
     #save all users mentioned in calendars in a set
     events_list = cal_ids.map do |i|
       #skip calendar if primary or not owned by user (cannot be changed anyway)
@@ -179,14 +182,14 @@ class Dayyiq < Sinatra::Base
                             'calendarId' => i,
                             'showDeleted' => false,
                             'singleEvents' => true,
-                            'timeMin' => (Date.today.beginning_of_month).strftime('%Y-%m-%dT%H:%M:%S%:z'),
-                            'timeMax' => (Date.today.beginning_of_month+12.months).strftime('%Y-%m-%dT%H:%M:%S%:z')
+                            'timeMin' => time_min.strftime('%Y-%m-%dT%H:%M:%S%:z'),
+                            'timeMax' => time_max.strftime('%Y-%m-%dT%H:%M:%S%:z')
                           }
                         )
     end
     #remove skipped entries (=nil)
     events_list.compact!
-    calendars = events_list.map { |c| Calender.new(c.data.items) }
+    calendars = events_list.map { |c| Calender.new(c.data.items, time_max, time_min) }
     slim :home, :locals => { :title => Konfig::TITLE, :cals => cals, :calendars => calendars}
   end
 end
