@@ -30,7 +30,7 @@
                         label.label.label-danger>
                           i.fa.fa-bolt
                       -unless e.start.date.nil?
-                        -if Date.iso8601(e.end.date) > Date.iso8601(e.start.date)+2
+                        -if Date.iso8601(e.end.date) > Date.iso8601(e.start.date)+1
                           i.fa.fa-fast-forward
                           =<Date.iso8601(e.end.date).strftime "%e.%m."
                       -unless e.start.date_time.nil?
