@@ -9,6 +9,5 @@ gem 'puma'
 
 group :development, :test do
   gem 'sinatra-contrib'
-  gem 'rack-perftools_profiler'
 end
 
