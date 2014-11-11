@@ -4,7 +4,7 @@
 #
 # Author:: hmt (https://github.com/hmt)
 # Home:: https://github.com/hmt/dayyiq
-# Copyright:: Copyright (c) 2013 hmt
+# Copyright:: Copyright (c) 2013 - 2014 hmt
 # License:: MIT License
 #
 require 'google/api_client'
@@ -16,8 +16,6 @@ require 'sass'
 require 'active_support/core_ext/date/calculations'
 require 'active_support/time'
 require 'date'
-require 'rack/perftools_profiler'
-require "benchmark"
 
 begin
   require "#{File.dirname(__FILE__)}/config"
@@ -54,7 +52,6 @@ end
 
 class Dayyiq < Sinatra::Base
   CREDENTIAL_STORE_FILE = "#{$0}-oauth2.json"
-
   def api_client; settings.api_client; end
   def calendar_api; settings.calendar; end
 
@@ -70,17 +67,16 @@ class Dayyiq < Sinatra::Base
   end
 
   configure do
-    use ::Rack::PerftoolsProfiler, :default_printer => 'gif'
     client = Google::APIClient.new(
       :application_name => 'Dayyiq, a tight Google calendar app',
-      :application_version => '2.0.0')
+      :application_version => '3.0.0')
     client.retries = 3
 
     file_storage = Google::APIClient::FileStorage.new(CREDENTIAL_STORE_FILE)
     if file_storage.authorization.nil?
       client_secrets = Google::APIClient::ClientSecrets.load
       client.authorization = client_secrets.to_authorization
-      client.authorization.scope = 'https://www.googleapis.com/auth/calendar'
+      client.authorization.scope = 'https://www.googleapis.com/auth/calendar.readonly'
     else
       client.authorization = file_storage.authorization
     end
@@ -103,11 +99,6 @@ class Dayyiq < Sinatra::Base
     enable :static
     enable :logging
     set :views, settings.root + '/views'
-  end
-
-  configure :development do
-    require 'sinatra/reloader'
-    register Sinatra::Reloader
   end
 
   helpers do
@@ -161,16 +152,14 @@ class Dayyiq < Sinatra::Base
     #fetch all calendars
     result = api_client.execute(:api_method => calendar_api.calendar_list.list,
                                 :authorization => user_credentials)
-    cals = result.data.items.map do |i|
+    cal_names, cal_ids = [], []
+    result.data.items.each do |i|
       #skip id calendar does not belong to owner or is the "private" primary one
       next if i.primary || i.accessRole != "owner"
-      i.summary
+      cal_names << i.summary
+      cal_ids << i.id
     end
-    cals.compact!
-    cal_ids = result.data.items.map do |i|
-      next if i.primary || i.accessRole != "owner"
-      i.id
-    end
+    cal_names.compact!
     cal_ids.compact!
     time_min = (Date.today.beginning_of_month)
     time_max = (Date.today.beginning_of_month+12.months)
@@ -179,17 +168,18 @@ class Dayyiq < Sinatra::Base
       #skip calendar if primary or not owned by user (cannot be changed anyway)
       api_client.execute(:api_method => calendar_api.events.list,
                          :parameters => {
-                            'calendarId' => i,
-                            'showDeleted' => false,
-                            'singleEvents' => true,
-                            'timeMin' => time_min.strftime('%Y-%m-%dT%H:%M:%S%:z'),
-                            'timeMax' => time_max.strftime('%Y-%m-%dT%H:%M:%S%:z')
-                          }
+        'calendarId' => i,
+        'showDeleted' => false,
+        'singleEvents' => true,
+        'timeMin' => time_min.strftime('%Y-%m-%dT%H:%M:%S%:z'),
+        'timeMax' => time_max.strftime('%Y-%m-%dT%H:%M:%S%:z')
+      }
                         )
     end
     #remove skipped entries (=nil)
     events_list.compact!
     calendars = events_list.map { |c| Calender.new(c.data.items, time_max, time_min) }
-    slim :home, :locals => { :title => Konfig::TITLE, :cals => cals, :calendars => calendars}
+    slim :home, :locals => { :title => Konfig::TITLE, :cals => cal_names, :calendars => calendars}
   end
 end
+
