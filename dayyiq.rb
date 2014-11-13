@@ -11,6 +11,7 @@ require 'google/api_client'
 require 'google/api_client/client_secrets'
 require 'google/api_client/auth/file_storage'
 require 'sinatra/base'
+require 'sinatra/r18n'
 require 'slim'
 require 'sass'
 require 'active_support/core_ext/date/calculations'
@@ -26,27 +27,35 @@ end
 
 AppRoot = File.expand_path(File.dirname(__FILE__))
 
-class Calender
-  def initialize(cal, time_max, time_min)
-    @cal = cal
+class Calendar
+  attr_reader :name
+  attr_reader :id
+  attr_reader :time_min
+  attr_reader :time_max
+  attr_reader :days
+
+  def initialize(id, name, events, time_max, time_min)
+    @id = id
+    @name = name
+    @events = events
     @time_max = time_max
     @time_min = time_min
-    days = time_max - time_min
-    @ary = Array.new(days) {Array.new}
-    fill_ary
+    @days = time_max - time_min
+    @event_matrix = Array.new(@days) {Array.new}
+    fill_event_matrix
   end
 
-  def fill_ary
-    @cal.each do |e|
+  def fill_event_matrix
+    @events.each do |e|
       date = e.start.date || e.start.date_time
       date = date.to_date
-      @ary[@time_min-date] << e
+      @event_matrix[@time_min-date] << e
     end
   end
 
   def day_events(day)
     date = @time_min-day
-    @ary[date]
+    @event_matrix[date]
   end
 end
 
@@ -99,6 +108,8 @@ class Dayyiq < Sinatra::Base
     enable :static
     enable :logging
     set :views, settings.root + '/views'
+    register Sinatra::R18n
+    R18n::I18n.default = 'de'
   end
 
   helpers do
@@ -109,6 +120,10 @@ class Dayyiq < Sinatra::Base
     def flash
       @flash = session.delete(:flash)
     end
+
+    def today
+      today ||= Date.today
+    end
   end
 
   before do
@@ -116,6 +131,7 @@ class Dayyiq < Sinatra::Base
     unless user_credentials.access_token || request.path_info =~ /\A\/oauth2/
       redirect to('/oauth2authorize')
     end
+    session[:locale] = 'de'
   end
 
   after do
@@ -150,36 +166,23 @@ class Dayyiq < Sinatra::Base
 
   get '/' do
     #fetch all calendars
-    result = api_client.execute(:api_method => calendar_api.calendar_list.list,
+    cals = api_client.execute(:api_method => calendar_api.calendar_list.list,
                                 :authorization => user_credentials)
-    cal_names, cal_ids = [], []
-    result.data.items.each do |i|
-      #skip id calendar does not belong to owner or is the "private" primary one
-      next if i.primary || i.accessRole != "owner"
-      cal_names << i.summary
-      cal_ids << i.id
-    end
-    cal_names.compact!
-    cal_ids.compact!
     time_min = (Date.today.beginning_of_month)
     time_max = (Date.today.beginning_of_month+12.months)
-    #save all users mentioned in calendars in a set
-    events_list = cal_ids.map do |i|
-      #skip calendar if primary or not owned by user (cannot be changed anyway)
-      api_client.execute(:api_method => calendar_api.events.list,
-                         :parameters => {
-        'calendarId' => i,
-        'showDeleted' => false,
-        'singleEvents' => true,
-        'timeMin' => time_min.strftime('%Y-%m-%dT%H:%M:%S%:z'),
-        'timeMax' => time_max.strftime('%Y-%m-%dT%H:%M:%S%:z')
-      }
-                        )
+    calendars = []
+    cals.data.items.each do |c|
+      next if c.primary || c.accessRole != "owner"
+      cal = api_client.execute(:api_method => calendar_api.events.list,
+                               :parameters => {
+                                  'calendarId' => c.id,
+                                  'showDeleted' => false,
+                                  'singleEvents' => true,
+                                  'timeMin' => time_min.strftime('%Y-%m-%dT%H:%M:%S%:z'),
+                                  'timeMax' => time_max.strftime('%Y-%m-%dT%H:%M:%S%:z')})
+      calendars << Calendar.new(c.id, c.summary, cal.data.items, time_max, time_min)
     end
-    #remove skipped entries (=nil)
-    events_list.compact!
-    calendars = events_list.map { |c| Calender.new(c.data.items, time_max, time_min) }
-    slim :home, :locals => { :title => Konfig::TITLE, :cals => cal_names, :calendars => calendars}
+    slim :home, :locals => { :title => Konfig::TITLE, :calendars => calendars}
   end
 end
 

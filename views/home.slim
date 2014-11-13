@@ -1,27 +1,26 @@
 .row
   .col-md-12
-    - today = Date.today
-    - 12.times do |months|
-      - date = today >> months
-      - d = Date.new(date.year, date.month, 1)
+    .table-responsive
       table.table.table-bordered.table-condensed
         thead
-          tr
-            th #{date.strftime "%B"}
-            - cals.each do |cal|
-              th =cal
+          th
+          - calendars.each do |cal|
+            th =cal.name
         tbody
-          - days = (date.end_of_month - date.beginning_of_month + 1).to_i
-          - days.times do |day|
+          - calendars.first.time_min.upto(calendars.first.time_max) do |d|
+            -if d == (d.beginning_of_month)
+              tr class="info"
+                td colspan=calendars.length+1
+                  b =l(d, "%B")
             tr class=('success' if d == today)
               td class=("active" if d.sunday?)
-                = d.strftime "%A"
+                = l(d, "%A")
                 br
                 = d.strftime "%e.%-m.%Y"
               - calendars.each do |cal|
                 td class=("active" if d.sunday?)
                   - if d.sunday?
-                    b.text-muted #{cals.push(cals.shift).last}
+                    b.text-muted =cal.name
                   - cal.day_events(d).each do |e|
                     p
                       =e.summary
@@ -35,4 +34,3 @@
                           =<Date.iso8601(e.end.date).strftime "%e.%m."
                       -unless e.start.date_time.nil?
                         =>e.start.date_time.strftime "%k:%M"
-            - d = d+1
