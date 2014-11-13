@@ -12,7 +12,7 @@ GEM
       addressable (>= 2.3.1)
       extlib (>= 0.9.15)
       multi_json (>= 1.0.0)
-    backports (3.6.3)
+    backports (3.6.4)
     extlib (0.9.16)
     faraday (0.9.0)
       multipart-post (>= 1.2, < 3)
@@ -33,11 +33,12 @@ GEM
     jwt (1.0.0)
     launchy (2.4.3)
       addressable (~> 2.3)
-    minitest (5.4.2)
+    minitest (5.4.3)
     multi_json (1.10.1)
     multipart-post (2.0.0)
     puma (2.9.2)
       rack (>= 1.1, < 2.0)
+    r18n-core (1.1.11)
     rack (1.5.2)
     rack-protection (1.5.3)
       rack
@@ -262,6 +263,9 @@ GEM
       rack-test
       sinatra (~> 1.4.0)
       tilt (~> 1.3)
+    sinatra-r18n (1.1.11)
+      r18n-core (= 1.1.11)
+      sinatra (>= 1.3)
     slim (2.1.0)
       temple (~> 0.6.9)
       tilt (>= 1.3.3, < 2.1)
@@ -283,4 +287,5 @@ DEPENDENCIES
   sass
   sinatra
   sinatra-contrib
+  sinatra-r18n
   slim
