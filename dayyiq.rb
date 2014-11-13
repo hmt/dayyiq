@@ -32,7 +32,6 @@ class Calendar
   attr_reader :id
   attr_reader :time_min
   attr_reader :time_max
-  attr_reader :days
 
   def initialize(id, name, events, time_max, time_min)
     @id = id
@@ -40,8 +39,8 @@ class Calendar
     @events = events
     @time_max = time_max
     @time_min = time_min
-    @days = time_max - time_min
-    @event_matrix = Array.new(@days) {Array.new}
+    days = time_max - time_min
+    @event_matrix = Array.new(days) {Array.new}
     fill_event_matrix
   end
 
@@ -79,7 +78,7 @@ class Dayyiq < Sinatra::Base
     client = Google::APIClient.new(
       :application_name => 'Dayyiq, a tight Google calendar app',
       :application_version => '3.0.0')
-    client.retries = 3
+    client.retries = 5
 
     file_storage = Google::APIClient::FileStorage.new(CREDENTIAL_STORE_FILE)
     if file_storage.authorization.nil?
