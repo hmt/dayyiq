@@ -2,9 +2,8 @@
 # needed. Testing and development should work without this file.
 #
 module Konfig
-  TITLE = 'simple ics2html converter'
+  TITLE = 'simple Google calendar to html converter'
   TIME_ZONE = 'Europe/Berlin'
-  ICS_FILE = 'cals.ics'
   BRAND = 'Termine'
   FOOTER = 'Read more books'
 end
