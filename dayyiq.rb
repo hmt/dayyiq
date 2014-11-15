@@ -117,7 +117,6 @@ class Dayyiq < Sinatra::Base
     set :views, settings.root + '/views'
     register Sinatra::R18n
     R18n::I18n.default = 'de'
-    R18n.set('de')
   end
 
   helpers do
@@ -132,6 +131,10 @@ class Dayyiq < Sinatra::Base
     def today
       today ||= Date.today
     end
+
+    def updated(calendars)
+      calendars.map{|cal| cal.last_updated(14)}.flatten
+    end
   end
 
   before do
@@ -139,6 +142,7 @@ class Dayyiq < Sinatra::Base
     unless user_credentials.access_token || request.path_info =~ /\A\/oauth2/
       redirect to('/oauth2authorize')
     end
+    session[:locale] = 'de'
   end
 
   after do
