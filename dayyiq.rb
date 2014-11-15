@@ -56,6 +56,14 @@ class Calendar
     date = @time_min-day
     @event_matrix[date]
   end
+
+  def last_updated(d)
+    today = Date.today
+    @events.select do |e|
+      date = e.updated
+      date > today-d
+    end
+  end
 end
 
 class Dayyiq < Sinatra::Base
