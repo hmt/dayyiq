@@ -1,8 +1,9 @@
 doctype 5
-html lang="en"
+html lang="de"
   head
     meta charset="utf-8"
-    meta name="viewport" content="width=device-width, initial-scale=1.0"
+    meta name="viewport" content="width=device-width, initial-scale=1"
+    meta http-equiv="X-UA-Compatible" content="IE=edge"
     title #{Konfig::TITLE}
     /![if lt IE 9]
       script src="//cdn.jsdelivr.net/html5shiv/3.7.2/html5shiv-printshiv.min.js"
@@ -15,22 +16,26 @@ html lang="en"
     #wrap
       .container
         .row
-          .col-md-12
+          .col-md-11
             h1
               span.brand = Konfig::BRAND
-        ==partial :partial_flash
-        p
-          | Legende: 
-          br
-          label.label.label-danger>
-            i.fa.fa-bolt
-          | markiert einen Termin, der in den letzten zwei Wochen neu hinzugefügt oder modifiziert worden ist.
-          br
-          i.fa.fa-fast-forward>
-          | mehrtägiger Termin, z.B. Praktikum
+          .col-md-1
+              i(class="fa fa-question-circle fa-2x text-primary pull-right" id="help"
+                title="Hilfe"
+                data-content="#{"<b>Legende:</b><br><label class=\"label label-danger\"><i class=\"fa fa-bolt\"></i></label> markiert einen Termin, der in den letzten zwei Wochen neu hinzugefügt oder modifiziert worden ist.<p><i class=\"fa fa-fast-forward\"></i> markiert einen mehrtägigen Termin, z.B. ein Praktikum</p>"}")
         ==yield
     #footer
       .container
         p.text-muted.credit
           .pull-right.body-content
             = Konfig::FOOTER
+    script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"
+    script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"
+    javascript:
+      (function() {
+        $("#help").popover({
+          placement: 'auto',
+          html: true,
+          trigger: 'hover'
+        });
+      }).call(this);

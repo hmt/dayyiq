@@ -2,7 +2,7 @@
   .col-md-12
     .panel-body
       ul.list-group
-        li.list-group-item.active Kürzlich aktualisierte Termine
+        li.list-group-item.list-group-item-info Kürzlich aktualisierte Termine
         -calendars.each do |cal|
           -cal.last_updated(15).each do |e|
             li.list-group-item.list-group-item-success
@@ -27,7 +27,7 @@
         tbody
           - calendars.first.time_min.upto(calendars.first.time_max) do |d|
             -if d == (d.beginning_of_month)
-              tr class="info"
+              tr.info
                 td colspan=calendars.length+1
                   b =l(d, "%B")
             tr class=('success' if d == today)
