@@ -189,7 +189,7 @@ class Dayyiq < Sinatra::Base
                                   'timeMax' => time_max.strftime('%Y-%m-%dT%H:%M:%S%:z')})
       calendars << Calendar.new(c.id, c.summary, cal.data.items, time_max, time_min)
     end
-    slim :home, :locals => { :title => Konfig::TITLE, :calendars => calendars}
+    slim :home, :locals => { :calendars => calendars }
   end
 end
 
