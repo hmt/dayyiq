@@ -108,7 +108,7 @@ class Dayyiq < Sinatra::Base
 
     set :slim, :pretty => true
     enable :sessions
-    set :session_secret, ENV['dayyiq_secret'] ||= 'super secret'
+    set :session_secret, Konfig::SESSION_SECRET
     enable :method_override
     set :protection, :except => :session_hijacking
     set :public_dir, settings.root + "/public"

@@ -4,6 +4,7 @@
 module Konfig
   TITLE = 'simple Google calendar to html converter'
   TIME_ZONE = 'Europe/Berlin'
+  SESSION_SECRET = 'secret_secret_secret'
   BRAND = 'Termine'
   FOOTER = 'Read more books'
 end
