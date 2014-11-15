@@ -2,7 +2,8 @@
   .col-md-12
     .panel-body
       ul.list-group
-        li.list-group-item.list-group-item-info Kürzlich aktualisierte Termine
+        li.list-group-item.list-group-item-info
+          b Kürzlich aktualisierte Termine
         -calendars.each do |cal|
           -cal.last_updated(15).each do |e|
             li.list-group-item.list-group-item-success
@@ -15,6 +16,7 @@
                   =<Date.iso8601(e.start.date).strftime " am %e.%m.%Y"
               -unless e.start.date_time.nil?
                 =<e.start.date_time.strftime " am %e.%m.%Y um %k:%M"
+              .label.label-success =l e.updated, :human
 
 .row
   .col-md-12
